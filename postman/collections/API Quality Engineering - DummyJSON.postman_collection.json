@@ -1,0 +1,1956 @@
+{
+  "info": {
+    "_postman_id": "f87bbbe6-69f3-426b-acdc-daaa8df42f4a",
+    "name": "API Quality Engineering - DummyJSON",
+    "description": "Projeto profissional de automação de testes de API utilizando Postman.\n\nObjetivos:\n\n• Testes funcionais  \n• Testes negativos  \n• Fluxos E2E  \n• Variáveis de ambiente  \n• Scripts em JavaScript  \n• Validação de contratos  \n• Execução automatizada  \n• Integração com GitHub",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16853331",
+    "_collection_link": "https://go.postman.co/collection/16853331-f87bbbe6-69f3-426b-acdc-daaa8df42f4a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - Health Check",
+      "item": [
+        {
+          "name": "GET - Validar disponibilidade da API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 'ok'\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.status).to.eql(\"ok\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o método GET\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.method).to.eql(\"GET\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 2000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A resposta deve ser JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "item": [
+        {
+          "name": "POST - Login com credenciais válidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Valida status HTTP\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// Valida dados do usuário autenticado\r",
+                  "pm.test(\"Deve retornar o usuário autenticado\", function () {\r",
+                  "    pm.expect(response.username).to.eql(\"emilys\");\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "});\r",
+                  "\r",
+                  "// Valida os tokens\r",
+                  "pm.test(\"Deve retornar accessToken\", function () {\r",
+                  "    pm.expect(response.accessToken).to.exist;\r",
+                  "    pm.expect(response.accessToken).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar refreshToken\", function () {\r",
+                  "    pm.expect(response.refreshToken).to.exist;\r",
+                  "    pm.expect(response.refreshToken).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "// Salva os dados no Environment\r",
+                  "pm.environment.set(\"accessToken\", response.accessToken);\r",
+                  "pm.environment.set(\"refreshToken\", response.refreshToken);\r",
+                  "pm.environment.set(\"userId\", response.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"emilys\",\r\n    \"password\": \"emilyspass\",\r\n    \"expiresInMins\": 30\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar usuário autenticado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o usuário autenticado\", function () {\r",
+                  "    const userId = Number(pm.environment.get(\"userId\"));\r",
+                  "\r",
+                  "    pm.expect(response.id).to.eql(userId);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o username correto\", function () {\r",
+                  "    pm.expect(response.username).to.eql(\"emilys\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um e-mail válido\", function () {\r",
+                  "    pm.expect(response.email).to.be.a(\"string\");\r",
+                  "    pm.expect(response.email).to.include(\"@\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar os campos obrigatórios do usuário\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"id\");\r",
+                  "    pm.expect(response).to.have.property(\"firstName\");\r",
+                  "    pm.expect(response).to.have.property(\"lastName\");\r",
+                  "    pm.expect(response).to.have.property(\"email\");\r",
+                  "    pm.expect(response).to.have.property(\"username\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 2000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Users",
+      "item": [
+        {
+          "name": "GET - Listar usuários",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar uma lista de usuários\", function () {\r",
+                  "    pm.expect(response.users).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A lista de usuários não deve estar vazia\", function () {\r",
+                  "    pm.expect(response.users.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cada usuário deve possuir os campos obrigatórios\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user).to.have.property(\"id\");\r",
+                  "        pm.expect(user).to.have.property(\"firstName\");\r",
+                  "        pm.expect(user).to.have.property(\"lastName\");\r",
+                  "        pm.expect(user).to.have.property(\"email\");\r",
+                  "        pm.expect(user).to.have.property(\"username\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os campos principais devem possuir os tipos corretos\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user.id).to.be.a(\"number\");\r",
+                  "        pm.expect(user.firstName).to.be.a(\"string\");\r",
+                  "        pm.expect(user.lastName).to.be.a(\"string\");\r",
+                  "        pm.expect(user.email).to.be.a(\"string\");\r",
+                  "        pm.expect(user.username).to.be.a(\"string\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Todos os usuários devem possuir e-mail válido\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user.email).to.include(\"@\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar informações de paginação\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"total\");\r",
+                  "    pm.expect(response).to.have.property(\"skip\");\r",
+                  "    pm.expect(response).to.have.property(\"limit\");\r",
+                  "\r",
+                  "    pm.expect(response.total).to.be.a(\"number\");\r",
+                  "    pm.expect(response.skip).to.be.a(\"number\");\r",
+                  "    pm.expect(response.limit).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 2000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar usuário por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "const userId = Number(pm.environment.get(\"userId\"));\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o usuário solicitado\", function () {\r",
+                  "    pm.expect(response.id).to.eql(userId);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar os campos obrigatórios\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"id\");\r",
+                  "    pm.expect(response).to.have.property(\"firstName\");\r",
+                  "    pm.expect(response).to.have.property(\"lastName\");\r",
+                  "    pm.expect(response).to.have.property(\"email\");\r",
+                  "    pm.expect(response).to.have.property(\"username\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O ID deve ser numérico\", function () {\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O e-mail deve possuir formato válido\", function () {\r",
+                  "    pm.expect(response.email).to.be.a(\"string\");\r",
+                  "    pm.expect(response.email).to.include(\"@\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O username deve ser uma string não vazia\", function () {\r",
+                  "    pm.expect(response.username).to.be.a(\"string\");\r",
+                  "    pm.expect(response.username.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 2000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Listar usuários com paginação",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar exatamente 5 usuários\", function () {\r",
+                  "    pm.expect(response.users).to.be.an(\"array\");\r",
+                  "    pm.expect(response.users.length).to.eql(5);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve respeitar o limit informado\", function () {\r",
+                  "    pm.expect(response.limit).to.eql(5);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve respeitar o skip informado\", function () {\r",
+                  "    pm.expect(response.skip).to.eql(10);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar total de usuários\", function () {\r",
+                  "    pm.expect(response.total).to.be.a(\"number\");\r",
+                  "    pm.expect(response.total).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os usuários retornados devem possuir ID válido\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user.id).to.be.a(\"number\");\r",
+                  "        pm.expect(user.id).to.be.above(0);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cada usuário deve possuir os campos principais\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user).to.have.property(\"id\");\r",
+                  "        pm.expect(user).to.have.property(\"firstName\");\r",
+                  "        pm.expect(user).to.have.property(\"lastName\");\r",
+                  "        pm.expect(user).to.have.property(\"email\");\r",
+                  "        pm.expect(user).to.have.property(\"username\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 2000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?limit=5&skip=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "skip",
+                  "value": "10",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Buscar usuário por nome",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "const searchTerm = \"Emily\";\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar uma lista de usuários\", function () {\r",
+                  "    pm.expect(response.users).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A busca deve retornar pelo menos um usuário\", function () {\r",
+                  "    pm.expect(response.users.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O resultado deve corresponder ao termo pesquisado\", function () {\r",
+                  "    const encontrouUsuario = response.users.some(function (user) {\r",
+                  "        return user.firstName\r",
+                  "            .toLowerCase()\r",
+                  "            .includes(searchTerm.toLowerCase());\r",
+                  "    });\r",
+                  "\r",
+                  "    pm.expect(encontrouUsuario).to.be.true;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os usuários devem possuir os campos principais\", function () {\r",
+                  "    response.users.forEach(function (user) {\r",
+                  "        pm.expect(user).to.have.property(\"id\");\r",
+                  "        pm.expect(user).to.have.property(\"firstName\");\r",
+                  "        pm.expect(user).to.have.property(\"email\");\r",
+                  "        pm.expect(user).to.have.property(\"username\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/search?q=Emily",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Emily"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Products",
+      "item": [
+        {
+          "name": "GET - Listar produtos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar uma lista de produtos\", function () {\r",
+                  "    pm.expect(response.products).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A lista de produtos não deve estar vazia\", function () {\r",
+                  "    pm.expect(response.products.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cada produto deve possuir os campos obrigatórios\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product).to.have.property(\"id\");\r",
+                  "        pm.expect(product).to.have.property(\"title\");\r",
+                  "        pm.expect(product).to.have.property(\"category\");\r",
+                  "        pm.expect(product).to.have.property(\"price\");\r",
+                  "        pm.expect(product).to.have.property(\"stock\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os campos principais devem possuir os tipos corretos\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product.id).to.be.a(\"number\");\r",
+                  "        pm.expect(product.title).to.be.a(\"string\");\r",
+                  "        pm.expect(product.category).to.be.a(\"string\");\r",
+                  "        pm.expect(product.price).to.be.a(\"number\");\r",
+                  "        pm.expect(product.stock).to.be.a(\"number\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Todos os produtos devem possuir preço maior que zero\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product.price).to.be.above(0);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O estoque dos produtos não deve ser negativo\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product.stock).to.be.at.least(0);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar informações de paginação\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"total\");\r",
+                  "    pm.expect(response).to.have.property(\"skip\");\r",
+                  "    pm.expect(response).to.have.property(\"limit\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar produto por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o produto solicitado\", function () {\r",
+                  "    pm.expect(response.id).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar os campos obrigatórios\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"id\");\r",
+                  "    pm.expect(response).to.have.property(\"title\");\r",
+                  "    pm.expect(response).to.have.property(\"description\");\r",
+                  "    pm.expect(response).to.have.property(\"category\");\r",
+                  "    pm.expect(response).to.have.property(\"price\");\r",
+                  "    pm.expect(response).to.have.property(\"stock\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O preço deve ser maior que zero\", function () {\r",
+                  "    pm.expect(response.price).to.be.a(\"number\");\r",
+                  "    pm.expect(response.price).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O estoque não deve ser negativo\", function () {\r",
+                  "    pm.expect(response.stock).to.be.a(\"number\");\r",
+                  "    pm.expect(response.stock).to.be.at.least(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O título do produto não deve estar vazio\", function () {\r",
+                  "    pm.expect(response.title).to.be.a(\"string\");\r",
+                  "    pm.expect(response.title.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Cadastrar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "// Salva o ID do produto criado no Environment\r",
+                  "pm.environment.set(\"productId\", response.id);\r",
+                  "\r",
+                  "pm.test(\"Deve cadastrar o produto com sucesso\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um ID para o produto criado\", function () {\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o título informado\", function () {\r",
+                  "    pm.expect(response.title).to.eql(\"Notebook QA Automation\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar a descrição informada\", function () {\r",
+                  "    pm.expect(response.description)\r",
+                  "        .to.eql(\"Produto criado durante testes automatizados de API\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o preço informado\", function () {\r",
+                  "    pm.expect(response.price).to.eql(4999.90);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o estoque informado\", function () {\r",
+                  "    pm.expect(response.stock).to.eql(10);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar a categoria informada\", function () {\r",
+                  "    pm.expect(response.category).to.eql(\"technology\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Notebook QA Automation\",\r\n  \"description\": \"Produto criado durante testes automatizados de API\",\r\n  \"price\": 4999.90,\r\n  \"stock\": 10,\r\n  \"category\": \"technology\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH - Atualizar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve atualizar o produto com sucesso\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve manter o ID do produto\", function () {\r",
+                  "    pm.expect(response.id).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve atualizar o título do produto\", function () {\r",
+                  "    pm.expect(response.title)\r",
+                  "        .to.eql(\"Notebook QA Automation - Atualizado\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve atualizar o preço do produto\", function () {\r",
+                  "    pm.expect(response.price).to.eql(4599.90);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O título deve continuar sendo uma string\", function () {\r",
+                  "    pm.expect(response.title).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O preço deve continuar sendo numérico\", function () {\r",
+                  "    pm.expect(response.price).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O preço deve ser maior que zero\", function () {\r",
+                  "    pm.expect(response.price).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Notebook QA Automation - Atualizado\",\r\n  \"price\": 4599.90\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE - Excluir produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve excluir o produto com sucesso\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o produto excluído\", function () {\r",
+                  "    pm.expect(response.id).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve indicar que o produto foi excluído\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"isDeleted\");\r",
+                  "    pm.expect(response.isDeleted).to.eql(true);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar a data da exclusão\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"deletedOn\");\r",
+                  "    pm.expect(response.deletedOn).to.be.a(\"string\");\r",
+                  "    pm.expect(response.deletedOn.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A data de exclusão deve possuir formato válido\", function () {\r",
+                  "    const deletedDate = new Date(response.deletedOn);\r",
+                  "    pm.expect(deletedDate.toString()).to.not.eql(\"Invalid Date\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Carts",
+      "item": [
+        {
+          "name": "GET - Listar carrinhos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar uma lista de carrinhos\", function () {\r",
+                  "    pm.expect(response.carts).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A lista de carrinhos não deve estar vazia\", function () {\r",
+                  "    pm.expect(response.carts.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cada carrinho deve possuir os campos principais\", function () {\r",
+                  "    response.carts.forEach(function (cart) {\r",
+                  "        pm.expect(cart).to.have.property(\"id\");\r",
+                  "        pm.expect(cart).to.have.property(\"products\");\r",
+                  "        pm.expect(cart).to.have.property(\"total\");\r",
+                  "        pm.expect(cart).to.have.property(\"totalProducts\");\r",
+                  "        pm.expect(cart).to.have.property(\"totalQuantity\");\r",
+                  "        pm.expect(cart).to.have.property(\"userId\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Products deve ser um array\", function () {\r",
+                  "    response.carts.forEach(function (cart) {\r",
+                  "        pm.expect(cart.products).to.be.an(\"array\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os produtos devem possuir quantidade maior que zero\", function () {\r",
+                  "    response.carts.forEach(function (cart) {\r",
+                  "        cart.products.forEach(function (product) {\r",
+                  "            pm.expect(product.quantity).to.be.above(0);\r",
+                  "        });\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os produtos devem possuir preço maior que zero\", function () {\r",
+                  "    response.carts.forEach(function (cart) {\r",
+                  "        cart.products.forEach(function (product) {\r",
+                  "            pm.expect(product.price).to.be.above(0);\r",
+                  "        });\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O total do carrinho não deve ser negativo\", function () {\r",
+                  "    response.carts.forEach(function (cart) {\r",
+                  "        pm.expect(cart.total).to.be.at.least(0);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar informações de paginação\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"total\");\r",
+                  "    pm.expect(response).to.have.property(\"skip\");\r",
+                  "    pm.expect(response).to.have.property(\"limit\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar carrinho por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar o carrinho solicitado\", function () {\r",
+                  "    pm.expect(response.id).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar a lista de produtos\", function () {\r",
+                  "    pm.expect(response.products).to.be.an(\"array\");\r",
+                  "    pm.expect(response.products.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve possuir um usuário associado\", function () {\r",
+                  "    pm.expect(response.userId).to.be.a(\"number\");\r",
+                  "    pm.expect(response.userId).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Os produtos devem possuir os campos principais\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product).to.have.property(\"id\");\r",
+                  "        pm.expect(product).to.have.property(\"title\");\r",
+                  "        pm.expect(product).to.have.property(\"price\");\r",
+                  "        pm.expect(product).to.have.property(\"quantity\");\r",
+                  "        pm.expect(product).to.have.property(\"total\");\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A quantidade dos produtos deve ser maior que zero\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        pm.expect(product.quantity).to.be.above(0);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O total de produtos deve ser consistente\", function () {\r",
+                  "    pm.expect(response.totalProducts).to.eql(response.products.length);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O totalQuantity deve corresponder à soma das quantidades\", function () {\r",
+                  "    const quantidadeTotal = response.products.reduce(function (total, product) {\r",
+                  "        return total + product.quantity;\r",
+                  "    }, 0);\r",
+                  "\r",
+                  "    pm.expect(response.totalQuantity).to.eql(quantidadeTotal);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Criar carrinho",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"cartId\", response.id);\r",
+                  "\r",
+                  "pm.test(\"Deve criar o carrinho com sucesso\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um ID para o carrinho\", function () {\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve associar o carrinho ao usuário informado\", function () {\r",
+                  "    pm.expect(response.userId).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar os produtos adicionados\", function () {\r",
+                  "    pm.expect(response.products).to.be.an(\"array\");\r",
+                  "    pm.expect(response.products.length).to.eql(2);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A quantidade total deve ser igual a 3\", function () {\r",
+                  "    pm.expect(response.totalQuantity).to.eql(3);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O total de produtos deve ser igual a 2\", function () {\r",
+                  "    pm.expect(response.totalProducts).to.eql(2);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O total de cada produto deve ser consistente\", function () {\r",
+                  "    response.products.forEach(function (product) {\r",
+                  "        const totalCalculado = product.price * product.quantity;\r",
+                  "\r",
+                  "        pm.expect(product.total).to.be.closeTo(totalCalculado, 0.01);\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O total do carrinho deve corresponder à soma dos produtos\", function () {\r",
+                  "    const totalCalculado = response.products.reduce(function (total, product) {\r",
+                  "        return total + product.total;\r",
+                  "    }, 0);\r",
+                  "\r",
+                  "    pm.expect(response.total).to.be.closeTo(totalCalculado, 0.01);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": 1,\r\n  \"products\": [\r\n    {\r\n      \"id\": 1,\r\n      \"quantity\": 2\r\n    },\r\n    {\r\n      \"id\": 2,\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH - Atualizar carrinho",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"merge\": true,\r\n  \"products\": [\r\n    {\r\n      \"id\": 1,\r\n      \"quantity\": 3\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - E2E Workflows",
+      "item": [
+        {
+          "name": "E2E - Fluxo de compra",
+          "item": [
+            {
+              "name": "01 - Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "\r",
+                      "pm.environment.set(\"accessToken\", response.accessToken);\r",
+                      "pm.environment.set(\"refreshToken\", response.refreshToken);\r",
+                      "pm.environment.set(\"userId\", response.id);\r",
+                      "\r",
+                      "pm.test(\"Login deve ser realizado com sucesso\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Deve retornar accessToken\", function () {\r",
+                      "    pm.expect(response.accessToken).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Deve retornar userId\", function () {\r",
+                      "    pm.expect(response.id).to.exist;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"emilyspass\",\r\n  \"expiresInMins\": 30\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "02 - Consultar usuário autenticado",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "const userId = Number(pm.environment.get(\"userId\"));\r",
+                      "\r",
+                      "pm.test(\"Usuário autenticado deve ser o usuário do login\", function () {\r",
+                      "    pm.expect(response.id).to.eql(userId);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Deve retornar status 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{accessToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "03 - Consultar produto",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "\r",
+                      "pm.environment.set(\"productId\", response.id);\r",
+                      "\r",
+                      "pm.test(\"Produto deve ser consultado com sucesso\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Produto deve possuir preço válido\", function () {\r",
+                      "    pm.expect(response.price).to.be.above(0);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Produto deve possuir estoque disponível\", function () {\r",
+                      "    pm.expect(response.stock).to.be.above(0);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "1"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "04 - Criar carrinho",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "\r",
+                      "pm.environment.set(\"cartId\", response.id);\r",
+                      "\r",
+                      "pm.test(\"Carrinho deve ser criado com sucesso\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Carrinho deve pertencer ao usuário autenticado\", function () {\r",
+                      "    const userId = Number(pm.environment.get(\"userId\"));\r",
+                      "\r",
+                      "    pm.expect(response.userId).to.eql(userId);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Carrinho deve possuir o produto selecionado\", function () {\r",
+                      "    const productId = Number(pm.environment.get(\"productId\"));\r",
+                      "\r",
+                      "    const product = response.products.find(function (item) {\r",
+                      "        return item.id === productId;\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.expect(product).to.exist;\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Quantidade total deve ser igual a 2\", function () {\r",
+                      "    pm.expect(response.totalQuantity).to.eql(2);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Total do produto deve estar correto\", function () {\r",
+                      "    response.products.forEach(function (product) {\r",
+                      "        const expectedTotal = product.price * product.quantity;\r",
+                      "\r",
+                      "        pm.expect(product.total).to.be.closeTo(expectedTotal, 0.01);\r",
+                      "    });\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Total do carrinho deve corresponder aos produtos\", function () {\r",
+                      "    const expectedTotal = response.products.reduce(function (sum, product) {\r",
+                      "        return sum + product.total;\r",
+                      "    }, 0);\r",
+                      "\r",
+                      "    pm.expect(response.total).to.be.closeTo(expectedTotal, 0.01);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"userId\": {{userId}},\r\n  \"products\": [\r\n    {\r\n      \"id\": {{productId}},\r\n      \"quantity\": 2\r\n    }\r\n  ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/carts/add",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "carts",
+                    "add"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 - Negative Tests",
+      "item": [
+        {
+          "name": "POST - Login com credenciais inválidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve rejeitar credenciais inválidas\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar mensagem de erro\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "    pm.expect(response.message.length).to.be.above(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar accessToken\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"accessToken\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\",\r\n  \"password\": \"senha_incorreta\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Login sem senha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve rejeitar login sem senha\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve informar que usuário e senha são obrigatórios\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.eql(\"Username and password required\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar accessToken\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"accessToken\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar refreshToken\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"refreshToken\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"emilys\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar usuário inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 404 para usuário inexistente\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar mensagem de usuário não encontrado\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.eql(\"User with id '999999' not found\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A mensagem de erro deve ser uma string\", function () {\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar dados de usuário\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"username\");\r",
+                  "    pm.expect(response).to.not.have.property(\"email\");\r",
+                  "    pm.expect(response).to.not.have.property(\"password\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar produto inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 404 para produto inexistente\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar mensagem de produto não encontrado\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.eql(\"Product with id '999999' not found\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A mensagem de erro deve ser uma string\", function () {\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar dados de produto\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"title\");\r",
+                  "    pm.expect(response).to.not.have.property(\"price\");\r",
+                  "    pm.expect(response).to.not.have.property(\"stock\");\r",
+                  "    pm.expect(response).to.not.have.property(\"category\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar usuário autenticado sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve retornar status 401 sem autenticação\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve informar que o Access Token é obrigatório\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.eql(\"Access Token is required\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A mensagem de erro deve ser uma string\", function () {\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar dados do usuário\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"id\");\r",
+                  "    pm.expect(response).to.not.have.property(\"username\");\r",
+                  "    pm.expect(response).to.not.have.property(\"email\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.cookies.jar().clear(\"https://dummyjson.com\", function (error) {\r",
+                  "    if (error) {\r",
+                  "        console.log(\"Erro ao limpar cookies:\", error);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET - Consultar usuário autenticado com token inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"Deve rejeitar token inválido\", function () {\r",
+                  "    pm.response.to.have.status(401);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar mensagem de token inválido ou expirado\", function () {\r",
+                  "    pm.expect(response).to.have.property(\"message\");\r",
+                  "    pm.expect(response.message).to.eql(\"Invalid/Expired Token!\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A mensagem de erro deve ser uma string\", function () {\r",
+                  "    pm.expect(response.message).to.be.a(\"string\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar dados do usuário\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"username\");\r",
+                  "    pm.expect(response).to.not.have.property(\"email\");\r",
+                  "    pm.expect(response).to.not.have.property(\"id\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Não deve retornar tokens\", function () {\r",
+                  "    pm.expect(response).to.not.have.property(\"accessToken\");\r",
+                  "    pm.expect(response).to.not.have.property(\"refreshToken\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "token_invalido_123",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Criar produto com dados inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"A API aceita a requisição mesmo com dados inválidos\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um ID para o produto criado\", function () {\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Evidência: API aceita título vazio\", function () {\r",
+                  "    pm.expect(response.title).to.eql(\"\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Evidência: API aceita preço negativo\", function () {\r",
+                  "    pm.expect(response.price).to.eql(-100);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Evidência: API aceita estoque negativo\", function () {\r",
+                  "    pm.expect(response.stock).to.eql(-5);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"\",\r\n    \"price\": -100,\r\n    \"stock\": -5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST - Criar carrinho com produto inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.test(\"A API deve processar a requisição\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Deve retornar um ID para o carrinho\", function () {\r",
+                  "    pm.expect(response.id).to.exist;\r",
+                  "    pm.expect(response.id).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"O carrinho deve permanecer associado ao usuário informado\", function () {\r",
+                  "    pm.expect(response.userId).to.eql(1);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Produto inexistente não deve ser adicionado ao carrinho\", function () {\r",
+                  "    pm.expect(response.products).to.be.an(\"array\");\r",
+                  "    pm.expect(response.products).to.have.lengthOf(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Total de produtos deve ser zero\", function () {\r",
+                  "    pm.expect(response.totalProducts).to.eql(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantidade total deve ser zero\", function () {\r",
+                  "    pm.expect(response.totalQuantity).to.eql(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Valor total do carrinho deve ser zero\", function () {\r",
+                  "    pm.expect(response.total).to.eql(0);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Tempo de resposta deve ser menor que 3000 ms\", function () {\r",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\": 1,\r\n    \"products\": [\r\n        {\r\n            \"id\": 999999,\r\n            \"quantity\": 2\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts/add",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

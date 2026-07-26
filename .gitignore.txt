@@ -1,0 +1,18 @@
+# Relatórios locais
+reports/
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Segredos e ambientes locais
+.env
+.env.*
