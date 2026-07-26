@@ -1,0 +1,33 @@
+name: API Tests - Postman
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar Postman CLI
+        run: |
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
+      - name: Verificar versão do Postman CLI
+        run: postman --version
+
+      - name: Executar testes de API
+        run: |
+          postman collection run \
+            "postman/collections/API Quality Engineering - DummyJSON.postman_collection.json" \
+            -e "postman/environments/DummyJSON-DEV.postman_environment.json"
